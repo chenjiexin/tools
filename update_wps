@@ -18,7 +18,7 @@ function install_package()
 			fi
 			package=${package##*/}
 			echo "Now installing package: $package"
-			sudo -S dpkg -i "$pack_dir/$package"
+			sudo dpkg -i "$pack_dir/$package"
 
 			if [ "$?" != "0" ]; then
 					echo "dpkg failed: $?"
