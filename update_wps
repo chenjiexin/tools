@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# -c check only
+# -n specify build number
+
+branch=/working_branch
+lastest_build=`ls $branch | tail -1`
+
+function install_package()
+{
+	pack_dir=$branch/$1/product/2052
+
+	if [ -d $pack_dir ]; then
+			package=`ls $pack_dir/*.deb | head -1`
+			if [ -z $package ]; then
+					echo "Not found any package..."
+					exit 0
+			fi
+			package=${package##*/}
+			echo "Now installing package: $package"
+			sudo -S dpkg -i "$pack_dir/$package"
+
+			if [ "$?" != "0" ]; then
+					echo "dpkg failed: $?"
+			else
+					echo "Now removing fonts"
+					sudo rm /usr/share/fonts/wps-office -fr
+			fi
+	else
+			echo "Not found any package under build_number: $1"
+	fi
+}
+
+while getopts cn: flag; do
+	case $flag in
+		c)
+			echo "The latest build number is: $lastest_build"
+			exit 0
+			;;
+		n)
+			install_package $OPTARG
+			echo "----Job done!----"
+			exit 0
+			;;
+		?)
+			exit 1
+			;;
+	esac
+done
+
+install_package $lastest_build
+echo "----Job done!----"

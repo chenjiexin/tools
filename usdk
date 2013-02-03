@@ -1,0 +1,25 @@
+#!/bin/bash
+
+branch=/working_branch
+lastest_build=`ls $branch | tail -1`
+
+echo "The latest build number: $lastest_build"
+
+rel_sdk=$branch/$lastest_build/product/linux/sdk
+dbg_sdk=$branch/$lastest_build/product/linuxd/sdk
+
+my_sdk=/workspace/src/wps/sdk
+
+if [ -d "$rel_sdk" ]; then
+		echo "Updating release sdk.."
+		cp $rel_sdk/* $my_sdk
+else
+		echo "Not found release sdk!"
+fi
+
+if [ -d "$dbg_sdk" ]; then
+		echo "Updating debug sdk.."
+		cp $dbg_sdk/* $my_sdk
+else
+		echo "Not found debug sdk!"
+fi
