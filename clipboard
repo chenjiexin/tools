@@ -1,0 +1,12 @@
+#!/usr/bin/python
+
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+import sys
+
+if __name__ == "__main__":
+		app = QApplication(sys.argv)
+		clipboard = QApplication.clipboard()
+		formats = clipboard.mimeData().formats()
+		for format in formats:
+				print format
