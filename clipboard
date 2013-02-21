@@ -9,4 +9,4 @@ if __name__ == "__main__":
 		clipboard = QApplication.clipboard()
 		formats = clipboard.mimeData().formats()
 		for format in formats:
-				print format
+				print(format)
