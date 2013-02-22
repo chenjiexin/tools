@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+   gvim --servername=GVIM -f 
+else
+   gvim --servername=GVIM -f --remote-tab "$@"
+   wmctrl -a GVIM
+fi
