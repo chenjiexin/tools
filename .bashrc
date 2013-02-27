@@ -125,10 +125,8 @@ function _svn_diff()
 {
 	r1=`xclip -o`
 	if [[ $r1 =~ ^"r"[0-9]+$ ]]; then
-		r2=`xclip -o | sed -e 's#r##g'`
-		r2=r`expr $r2 - 1`
-		echo "svn_diff -$r2:$r1"
-		svn_diff -$r2:$r1
+		echo "svn_diff -c $r1"
+		svn_diff -c $r1
 	else
 		svn_diff
 	fi
