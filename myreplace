@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -z $1 ] || [ -z $2 ]; then
+	echo "Wrong args"
+	exit 1
+fi
+
+echo "replace '$1' to '$2' ? [Y]/n"
+read yes
+
+if [ "$yes" = "Y" ] || [ "$yes" = "y" ] || [ -z "$yes" ] ; then
+	find -iname "*.h" | xargs sed -i -e "s#$1#$2#g"
+	find -iname "*.cpp" | xargs sed -i -e "s#$1#$2#g"
+fi
