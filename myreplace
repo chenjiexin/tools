@@ -1,14 +1,51 @@
 #!/bin/bash
 
+#
+# -e custom expression
+# -s replace L"" -> __X(""), __X('') -> __Xc('')
+# default replace $1 to $2
+#
+
+function _help()
+{
+	echo "---mini source file content replacement tool---"
+	echo "-e  custom expression"
+	echo "-s  replace L\"\" -> __X(\"\"), __X('') -> __Xc('')"
+	echo "-h  show help"
+	echo "default replace \$1 to \$2"
+	echo "----------------------------------------------"
+}
+
+while getopts hse: flag; do
+	case $flag in
+		s)
+			echo "BEGIN REPLACE STRING PREFIX"
+			find -type f -iname "*.h" -or -iname "*.cpp" -or -iname "*.c" | xargs sed -i -e '/\\"/n' -e 's/L\("[^"]*"\)/__X(\1)/g' -e "s/__X('/__Xc('/g"
+			echo "END"
+			exit 0
+			;;
+		e)
+			echo "sed -i -e \"$OPTARG\""
+			find -type f -iname "*.h" -or -iname "*.cpp" -or -iname "*.c" | xargs sed -i -e "$OPTARG"
+			exit 0
+			;;
+		h)
+			_help
+			exit 0
+			;;
+		?)
+			exit 1
+			;;
+	esac
+done
+
 if [ -z $1 ] || [ -z $2 ] ; then
-	echo "Wrong args"
+	echo "Do nothing..."
 	exit 1
 fi
-
 echo "replace '$1' to '$2' ? [Y]/n"
 read yes
 
 if [ "$yes" = "Y" ] || [ "$yes" = "y" ] || [ -z "$yes" ] ; then
-	find -iname "*.h" | xargs sed -i -e "s#$1#$2#g"
-	find -iname "*.cpp" | xargs sed -i -e "s#$1#$2#g"
+	find -type f -iname "*.h" -or -iname "*.cpp" -or -iname "*.c" | xargs sed -i -e "s#$1#$2#g"
 fi
