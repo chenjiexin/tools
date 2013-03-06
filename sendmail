@@ -23,6 +23,7 @@ while getopts a:t:s:b:h flag; do
 			;;
 		s)
 			commands+="subject='$OPTARG',"
+			no_subj=$OPTARG
 			;;
 		b)
 			commands+="body='$OPTARG',"
