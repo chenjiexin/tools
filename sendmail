@@ -8,10 +8,11 @@ function _help()
 	echo "-t send to who"
 	echo "-s subject"
 	echo "-b email body"
+	echo "------------------------------------------"
 }
 
 no_subj=
-while getopts a:t:s:b: flag; do
+while getopts a:t:s:b:h flag; do
 	case $flag in
 		a)
 			file="file:///$(realpath $OPTARG)"
@@ -26,7 +27,12 @@ while getopts a:t:s:b: flag; do
 		b)
 			commands+="body='$OPTARG',"
 			;;
+		h)
+			_help
+			exit 0
+			;;
 		?)
+			_help
 			exit 1
 			;;
 	esac
