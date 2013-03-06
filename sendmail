@@ -1,0 +1,40 @@
+#!/bin/bash
+
+function _help()
+{
+	echo "----------Command Line Mail Tool----------"
+	echo "Options:"
+	echo "-a attachment"
+	echo "-t send to who"
+	echo "-s subject"
+	echo "-b email body"
+}
+
+no_subj=
+while getopts a:t:s:b: flag; do
+	case $flag in
+		a)
+			file="file:///$(realpath $OPTARG)"
+			commands+="attachment='$file',"
+			;;
+		t)
+			commands+="to='$OPTARG',"
+			;;
+		s)
+			commands+="subject='$OPTARG',"
+			;;
+		b)
+			commands+="body='$OPTARG',"
+			;;
+		?)
+			exit 1
+			;;
+	esac
+done
+
+if [ -z $no_subj ] ; then
+	commands+="subject='NO SUBJECT'"
+fi
+
+echo "thunderbird -compose \"$commands\""
+exec thunderbird -compose $commands
