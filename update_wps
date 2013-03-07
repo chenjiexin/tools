@@ -2,36 +2,99 @@
 
 # -c check only
 # -n specify build number
+# -p specify package extension
+
+set -e
+#set -x
 
 branch=/working_branch
 lastest_build=`ls $branch | tail -1`
+distribution=`cat /etc/*-release | grep ^ID= | cut -d'=' -f2`
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+function ubuntu_install()
+{
+	echo "Now installing package: $package"
+	sudo dpkg -i "$1"
+	
+	if [ "$?" != "0" ]; then
+		echo "dpkg failed: $?"
+	else
+	echo "Now removing fonts"
+		sudo rm /usr/share/fonts/wps-office -fr
+	fi
+}
+
+function gen_pkg_build()
+{
+	pkg_ver=$1
+	pkg_src=$2
+	sha1=`sha1sum $pkg_src | cut -d' ' -f1`
+
+	sed -i -e "s/PKG_VER/$pkg_ver/g" PKGBUILD
+	sed -i -e "s/SHA1/$sha1/g" PKGBUILD
+	sed -i -e "s#PKG_SOURCE#$pkg_src#g" PKGBUILD
+}
+
+function arch_install()
+{
+	tmp_dir=`mktemp -d`
+	cp  $1 $tmp_dir
+	cp $script_dir/PKGBUILD $tmp_dir
+	cp $script_dir/wps-office.install $tmp_dir
+
+	ver=`echo $1 | cut -d'/' -f6 | cut -d'_' -f2`
+	pkg="$tmp_dir/$(basename $1)"
+
+	cd $tmp_dir
+	echo "Generating PKGBUILD..."
+	gen_pkg_build $ver $pkg
+	
+	echo "Building..."
+	makepkg
+
+	echo "Installing..."
+	makepkg -i
+
+	echo "Job done."
+}
 
 function install_package()
 {
 	pack_dir=$branch/$1/product/2052
 
 	if [ -d $pack_dir ]; then
-			package=`ls $pack_dir/*.deb | head -1`
+			package=`ls $pack_dir/*.$pack_ext | head -1`
 			if [ -z $package ]; then
 					echo "Not found any package..."
 					exit 0
 			fi
 			package=${package##*/}
-			echo "Now installing package: $package"
-			sudo dpkg -i "$pack_dir/$package"
 
-			if [ "$?" != "0" ]; then
-					echo "dpkg failed: $?"
-			else
-					echo "Now removing fonts"
-					sudo rm /usr/share/fonts/wps-office -fr
-			fi
+			case $distribution in
+				ubuntu)
+					ubuntu_install "$pack_dir/$package"
+					exit 0
+					;;
+
+				arch)
+					arch_install "$pack_dir/$package"
+					exit 0
+					;;
+
+				*)
+					echo "Unsupported distribution"
+					exit 1
+					;;
+			esac
 	else
 			echo "Not found any package under build_number: $1"
 	fi
 }
 
-while getopts cn: flag; do
+pack_ext=deb
+
+while getopts cn:p: flag; do
 	case $flag in
 		c)
 			echo "The latest build number is: $lastest_build"
@@ -41,6 +104,9 @@ while getopts cn: flag; do
 			install_package $OPTARG
 			echo "----Job done!----"
 			exit 0
+			;;
+		p)
+			pack_ext=$OPTARG
 			;;
 		?)
 			exit 1
